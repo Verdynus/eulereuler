@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Леонард Эйлер — Популяризация математики</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --ink:        #1a1410;
+      --paper:      #f5f0e8;
+      --parchment:  #ede5d0;
+      --gold:       #b8860b;
+      --gold-light: #d4a843;
+      --rust:       #8b3a2a;
+      --teal:       #1e5f5e;
+      --teal-light: #2d8a87;
+      --cream:      #faf6ed;
+      --shadow:     rgba(26,20,16,0.15);
+      --rule:       rgba(184,134,11,0.3);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 19px;
+      line-height: 1.75;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE TEXTURE overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      text-align: center;
+      padding: 4rem 2rem;
+      position: relative;
+      background: var(--ink);
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 40%, #2a1f14 0%, #0f0b07 100%);
+    }
+
+    /* animated constellation dots */
+    .hero-stars {
+      position: absolute; inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(212,168,67,0.6) 1px, transparent 1px),
+        radial-gradient(circle, rgba(212,168,67,0.3) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px);
+      background-size: 120px 120px, 80px 80px, 200px 200px;
+      background-position: 0 0, 40px 40px, 100px 60px;
+      animation: drift 40s linear infinite;
+    }
+    @keyframes drift {
+      from { transform: translateY(0) translateX(0); }
+      to   { transform: translateY(-60px) translateX(-30px); }
+    }
+
+    /* decorative formula background */
+    .hero-formula {
+      position: absolute;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(10px, 1.5vw, 16px);
+      color: rgba(212,168,67,0.08);
+      white-space: nowrap;
+      line-height: 2.5;
+      top: 0; left: 0; right: 0;
+      padding: 2rem;
+      pointer-events: none;
+      letter-spacing: 0.05em;
+    }
+
+    .hero-content { position: relative; z-index: 2; max-width: 900px; }
+
+    .hero-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.2s forwards;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.6rem, 7vw, 6rem);
+      font-weight: 900;
+      line-height: 1.05;
+      color: var(--paper);
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.4s forwards;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--gold-light);
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+      color: rgba(245,240,232,0.7);
+      font-weight: 300;
+      font-style: italic;
+      max-width: 640px;
+      margin: 0 auto 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.6s forwards;
+    }
+
+    .hero-euler-id {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      color: var(--gold-light);
+      background: rgba(184,134,11,0.15);
+      border: 1px solid rgba(184,134,11,0.3);
+      padding: 0.5rem 1.5rem;
+      border-radius: 2px;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.8s forwards;
+    }
+
+    .scroll-hint {
+      position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      color: rgba(245,240,232,0.4);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+      animation: bounce 2s infinite;
+    }
+    .scroll-hint svg { opacity: 0.5; }
+    @keyframes bounce {
+      0%,100% { transform: translateX(-50%) translateY(0); }
+      50%      { transform: translateX(-50%) translateY(6px); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── SECTION WRAPPER ── */
+    .section {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 5rem 2rem;
+    }
+
+    .section-wide {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 5rem 2rem;
+    }
+
+    /* ── DECORATIVE RULE ── */
+    .ornamental-rule {
+      display: flex; align-items: center; gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .ornamental-rule::before,
+    .ornamental-rule::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--rule);
+    }
+    .ornamental-rule span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    /* ── CHAPTER LABEL ── */
+    .chapter-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+    }
+
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.9rem, 4vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--ink);
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--ink);
+    }
+
+    p { margin-bottom: 1.25rem; }
+    p:last-child { margin-bottom: 0; }
+
+    strong { font-weight: 600; color: var(--ink); }
+    em { font-style: italic; }
+
+    /* ── PROBLEM ZONE ── */
+    .problem-zone {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 6rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .problem-zone::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 40px,
+        rgba(255,255,255,0.015) 40px,
+        rgba(255,255,255,0.015) 41px
+      );
+    }
+
+    .problem-zone .section {
+      position: relative; z-index: 1;
+    }
+
+    .problem-zone h2 { color: var(--paper); }
+    .problem-zone .chapter-label { color: var(--gold-light); }
+    .problem-zone .ornamental-rule span { color: var(--gold-light); }
+    .problem-zone .ornamental-rule::before,
+    .problem-zone .ornamental-rule::after { background: rgba(212,168,67,0.25); }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin: 3rem 0;
+    }
+
+    .stat-card {
+      border: 1px solid rgba(212,168,67,0.2);
+      padding: 1.75rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: 20%; right: 20%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+    }
+
+    .stat-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--gold-light);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: rgba(245,240,232,0.6);
+      font-style: italic;
+      font-family: 'Crimson Pro', serif;
+    }
+
+    .callout-box {
+      border-left: 3px solid var(--gold);
+      padding: 1.5rem 2rem;
+      margin: 2.5rem 0;
+      background: rgba(184,134,11,0.07);
+      font-style: italic;
+      font-size: 1.05rem;
+    }
+
+    .problem-zone .callout-box {
+      border-left-color: var(--gold-light);
+      background: rgba(212,168,67,0.08);
+    }
+
+    /* ── BIOGRAPHY ── */
+    .bio-zone { background: var(--cream); }
+
+    .bio-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 4rem;
+      align-items: start;
+      overflow: visible;
+    }
+
+    @media (max-width: 700px) {
+      .bio-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+      }
+      .bio-portrait {
+        order: 1;
+      }
+      .bio-text {
+        order: 2;
+      }
+    }
+
+    .bio-portrait {
+      position: sticky; top: 2rem;
+    }
+
+    @media (max-width: 700px) {
+      .bio-portrait {
+        position: static;
+      }
+    }
+
+    .portrait-frame {
+      border: 1px solid var(--rule);
+      padding: 1rem;
+      background: var(--paper);
+      position: relative;
+    }
+
+    .portrait-frame::before {
+      content: '';
+      position: absolute;
+      inset: 6px;
+      border: 1px solid rgba(184,134,11,0.15);
+      pointer-events: none;
+    }
+
+    .portrait-inner {
+      background: linear-gradient(145deg, #e8dfc8, #d5c9aa);
+      aspect-ratio: 3/4;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* SVG portrait placeholder */
+    .portrait-inner svg {
+      width: 70%;
+      opacity: 0.85;
+    }
+
+    .portrait-caption {
+      text-align: center;
+      padding: 0.75rem 0 0;
+      font-size: 0.8rem;
+      color: var(--gold);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.1em;
+    }
+
+    .timeline {
+      margin-top: 2.5rem;
+      position: relative;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 6px; bottom: 6px;
+      width: 1px;
+      background: var(--rule);
+    }
+
+    .timeline-item {
+      padding: 0 0 2rem 2rem;
+      position: relative;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -3px; top: 8px;
+      width: 7px; height: 7px;
+      background: var(--gold);
+      border-radius: 50%;
+    }
+
+    .timeline-year {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+      margin-bottom: 0.25rem;
+    }
+
+    .timeline-event {
+      font-size: 0.95rem;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    /* ── DISCOVERIES ── */
+    .discoveries-zone {
+      background: var(--parchment);
+    }
+
+    .accordion-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .accordion {
+      background: var(--paper);
+      border: 1px solid rgba(184,134,11,0.2);
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow 0.3s;
+    }
+
+    .accordion:hover {
+      box-shadow: 0 8px 32px var(--shadow);
+    }
+
+    .accordion::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+
+    .accordion.open::before { transform: scaleX(1); }
+
+    .accordion-header {
+      padding: 1.75rem 2rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      user-select: none;
+    }
+
+    .accordion-title-wrap { flex: 1; }
+
+    .accordion-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      color: var(--gold);
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+    }
+
+    .accordion-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+
+    .accordion-desc {
+      font-size: 0.88rem;
+      color: rgba(26,20,16,0.55);
+      font-style: italic;
+      margin-top: 0.3rem;
+    }
+
+    .accordion-arrow {
+      width: 32px; height: 32px;
+      border: 1px solid rgba(184,134,11,0.3);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.35s, background 0.3s;
+      color: var(--gold);
+    }
+
+    .accordion.open .accordion-arrow {
+      transform: rotate(180deg);
+      background: var(--gold);
+      color: var(--paper);
+    }
+
+    .accordion-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .accordion.open .accordion-body {
+      max-height: 2000px;
+    }
+
+    .accordion-inner {
+      padding: 0 2rem 2rem;
+      border-top: 1px solid rgba(184,134,11,0.12);
+    }
+
+    .theorem-card {
+      margin: 1.25rem 0;
+      padding: 1.25rem 1.5rem;
+      background: var(--cream);
+      border-left: 2px solid var(--gold);
+      position: relative;
+    }
+
+    .theorem-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: rgba(184,134,11,0.08);
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      margin-bottom: 0.5rem;
+      border-radius: 1px;
+    }
+
+    .theorem-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+
+    .theorem-body {
+      font-size: 0.95rem;
+      line-height: 1.65;
+      color: var(--ink);
+    }
+
+    .theorem-formula {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      background: rgba(184,134,11,0.07);
+      border: 1px solid rgba(184,134,11,0.15);
+      padding: 0.5rem 1rem;
+      margin: 0.6rem 0;
+      display: inline-block;
+      color: var(--rust);
+    }
+
+    /* ── CONCLUSION ── */
+    .conclusion-zone {
+      background: var(--teal);
+      color: var(--paper);
+      padding: 6rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .conclusion-zone::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 100% 80% at 80% 50%, rgba(30,95,94,0.8) 0%, transparent 70%),
+        linear-gradient(135deg, #163e3e 0%, #1e5f5e 100%);
+    }
+
+    .conclusion-zone .section { position: relative; z-index: 1; }
+    .conclusion-zone h2 { color: var(--paper); }
+    .conclusion-zone .chapter-label { color: rgba(212,168,67,0.9); }
+    .conclusion-zone .ornamental-rule span { color: rgba(212,168,67,0.9); }
+    .conclusion-zone .ornamental-rule::before,
+    .conclusion-zone .ornamental-rule::after { background: rgba(212,168,67,0.2); }
+    .conclusion-zone p { color: rgba(245,240,232,0.85); }
+
+    .conclusion-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin: 3rem 0;
+    }
+
+    .conclusion-card {
+      border: 1px solid rgba(212,168,67,0.2);
+      padding: 2rem 1.75rem;
+      background: rgba(255,255,255,0.04);
+      position: relative;
+    }
+
+    .conclusion-card-icon {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.5rem;
+      color: var(--gold-light);
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .conclusion-card h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--paper);
+      margin-bottom: 0.6rem;
+    }
+
+    .conclusion-card p {
+      font-size: 0.92rem;
+      color: rgba(245,240,232,0.65);
+      line-height: 1.6;
+    }
+
+    .big-quote {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.3rem, 3vw, 1.85rem);
+      font-style: italic;
+      line-height: 1.5;
+      color: var(--paper);
+      padding: 2.5rem 0;
+      border-top: 1px solid rgba(212,168,67,0.2);
+      border-bottom: 1px solid rgba(212,168,67,0.2);
+      text-align: center;
+      margin: 3rem 0;
+      position: relative;
+    }
+
+    .big-quote::before {
+      content: '\201C';
+      font-size: 5rem;
+      line-height: 0;
+      color: rgba(212,168,67,0.2);
+      position: absolute;
+      top: 2.5rem; left: 0;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--ink);
+      color: rgba(245,240,232,0.35);
+      text-align: center;
+      padding: 2.5rem;
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.08em;
+    }
+
+    footer a { color: var(--gold); text-decoration: none; }
+
+    /* ── UTILITY ── */
+    .text-center { text-align: center; }
+    .mt-2 { margin-top: 2rem; }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════════ -->
+<header class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-stars"></div>
+  <div class="hero-formula">
+    e^(iπ) + 1 = 0 · · · V − E + F = 2 · · · φ(n) · · · ζ(s) = Σ n^(−s) · · · a^φ(n) ≡ 1 (mod n) · · · e^(iπ) + 1 = 0 · · · V − E + F = 2<br>
+    · · · Σ 1/n² = π²/6 · · · e^(ix) = cos(x) + i·sin(x) · · · d/dx(sin x) = cos x · · · Σ 1/n² = π²/6 · · · φ(n) · · · V − E + F = 2<br>
+    e^(iπ) + 1 = 0 · · · V − E + F = 2 · · · φ(n) · · · ζ(s) = Σ n^(−s) · · · a^φ(n) ≡ 1 (mod n) · · · Σ 1/n² = π²/6 · · · e^(iπ) + 1 = 0
+  </div>
+  <div class="hero-content">
+    <div class="hero-label">Исследовательский проект · Популяризация математики</div>
+    <h1>Леонард<br><em>Эйлер</em></h1>
+    <p class="hero-subtitle">Как один человек изменил облик математики — и почему его открытия важны для каждого из нас</p>
+    <div class="hero-euler-id">1707 – 1783 · Базель → Санкт-Петербург → Берлин</div>
+  </div>
+  <div class="scroll-hint">
+    <span>Листайте вниз</span>
+    <svg width="16" height="20" viewBox="0 0 16 20" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M8 2v16M2 12l6 6 6-6"/>
+    </svg>
+  </div>
+</header>
+
+
+<!-- ═══════════════════════════════════════════════
+     ВВЕДЕНИЕ — ПРОБЛЕМА
+════════════════════════════════════════════════ -->
+<div class="problem-zone">
+  <div class="section fade-in">
+    <div class="ornamental-rule"><span>Введение</span></div>
+    <div class="chapter-label">Глава I</div>
+    <h2>Математика сегодня:<br>зачем и почему важно</h2>
+
+    <p>Мы живём в эпоху, когда алгоритмы принимают медицинские решения, а цифровая безопасность держится на теории чисел, которую разрабатывали несколько столетий назад. <strong>Математика перестала быть абстрактной наукой</strong> — она встроена в каждый смартфон, каждую банковскую транзакцию, каждую рекомендацию в социальных сетях.</p>
+
+    <p>Искусственный интеллект, машинное обучение, криптография, квантовые вычисления — всё это невозможно без глубокого понимания математических структур. Специалисты, владеющие математическим мышлением, востребованы в десятках отраслей и получают лучшие предложения на рынке труда. <strong>Математика — это язык будущего.</strong></p>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-number">×2.4</div>
+        <div class="stat-label">разрыв в заработке между профессиями с высоким и низким уровнем математики</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">87%</div>
+        <div class="stat-label">профессий будущего требуют навыков аналитического и математического мышления</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">RSA</div>
+        <div class="stat-label">алгоритм шифрования интернета — прямое приложение теоремы Эйлера</div>
+      </div>
+    </div>
+
+    <div class="callout-box">
+      Проблема состоит не в том, что математика сложна. Проблема в том, что её преподают скучно. Когда формула оторвана от контекста, она мертва. Когда за формулой стоит история человека, загадка и открытие — она оживает.
+    </div>
+
+    <h3 style="margin-top:2.5rem;">Почему уроки математики должны быть интереснее и глубже</h3>
+
+    <p>Современная школьная программа нередко сводит математику к набору алгоритмов: «применяй формулу, получи ответ». Такой подход не развивает математического мышления — он формирует исполнителей, а не исследователей. <strong>Уроки математики должны становиться интереснее и сложнее</strong> — не в смысле механической трудности вычислений, а в смысле глубины понимания.</p>
+
+    <p>Когда ученик узнаёт не просто формулу, но <em>историю её возникновения</em>, <em>задачу, которую она решала</em>, <em>человека, который её нашёл</em> — математика превращается в захватывающее приключение. Именно поэтому популяризация математической науки среди учащихся и студентов сегодня — <strong>не просто педагогическая задача, а задача стратегическая</strong>.</p>
+
+    <p>Молодёжь должна понимать: математика — это не пытка у доски, а инструмент, которым пользовались и пользуются величайшие умы человечества. Один из таких умов — <strong>Леонард Эйлер</strong>.</p>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     ПЕРЕХОД К ЭЙЛЕРУ + БИОГРАФИЯ
+════════════════════════════════════════════════ -->
+<div class="bio-zone">
+  <div class="section fade-in">
+    <div class="ornamental-rule"><span>Биография</span></div>
+    <div class="chapter-label">Глава II</div>
+    <h2>Человек, который<br>написал математику заново</h2>
+
+    <p>Среди всех математиков в истории есть один, чьё имя встречается в каждом разделе науки. Его формулами пользуются инженеры, его теоремы защищают ваши данные в интернете, его нотация живёт в учебниках по всему миру. <strong>XVIII век в математике — это век Эйлера.</strong></p>
+
+    <div class="bio-grid" style="margin-top:3rem;">
+      <div class="bio-portrait">
+        <div class="portrait-frame">
+          <div class="portrait-inner">
+            <!-- Stylised SVG silhouette of Euler -->
+            <svg viewBox="0 0 200 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <radialGradient id="glow" cx="50%" cy="40%" r="50%">
+                  <stop offset="0%" stop-color="#d4a843" stop-opacity="0.2"/>
+                  <stop offset="100%" stop-color="#d4a843" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+              <ellipse cx="100" cy="120" rx="90" ry="110" fill="url(#glow)"/>
+              <!-- head -->
+              <ellipse cx="100" cy="65" rx="38" ry="42" fill="#b8860b" opacity="0.6"/>
+              <!-- wig -->
+              <ellipse cx="100" cy="42" rx="44" ry="20" fill="#c4a060" opacity="0.5"/>
+              <path d="M56 65 Q45 90 50 120" stroke="#c4a060" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
+              <path d="M144 65 Q155 90 150 120" stroke="#c4a060" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
+              <!-- body -->
+              <path d="M62 107 Q55 140 48 200 L152 200 Q145 140 138 107 Z" fill="#8b5e2a" opacity="0.5"/>
+              <!-- collar -->
+              <path d="M80 107 L100 120 L120 107" stroke="#e8dfc8" stroke-width="2" fill="none" opacity="0.7"/>
+              <!-- formula -->
+              <text x="100" y="240" text-anchor="middle" font-family="monospace" font-size="11" fill="#b8860b" opacity="0.8">e^(iπ) + 1 = 0</text>
+            </svg>
+          </div>
+          <div class="portrait-caption">Леонард Эйлер · 1707–1783</div>
+        </div>
+
+        <!-- timeline -->
+        <div class="timeline" style="margin-top:2.5rem;">
+          <div class="timeline-item">
+            <div class="timeline-year">1707</div>
+            <div class="timeline-event">Рождение в Базеле, Швейцария. Отец — пастор, любитель математики</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">1720</div>
+            <div class="timeline-event">В 13 лет поступает в Базельский университет, знакомится с Иоганном Бернулли</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">1727</div>
+            <div class="timeline-event">Приглашён в Петербургскую академию наук — начало великого периода</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">1741</div>
+            <div class="timeline-event">Переезд в Берлин, работа в Прусской академии наук при Фридрихе Великом</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">1766</div>
+            <div class="timeline-event">Возвращение в Петербург. Полная потеря зрения — но работа продолжается</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">1783</div>
+            <div class="timeline-event">Скончался в Петербурге в возрасте 76 лет, оставив более 850 научных работ</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bio-text">
+        <p><strong>Леонард Эйлер</strong> (15 апреля 1707 — 18 сентября 1783) — швейцарский математик, механик, физик и астроном, один из величайших учёных в истории человечества. Он родился в Базеле в семье пастора Пауля Эйлера, который сам увлекался математикой и лично занимался с сыном.</p>
+
+        <p>В тринадцать лет Леонард поступил в Базельский университет, где его блестящие способности заметил сам Иоганн Бернулли — один из лучших математиков эпохи. В 1727 году Эйлер принял приглашение Петербургской академии наук и вскоре стал её ведущим учёным.</p>
+
+        <p>За свою жизнь Эйлер <strong>написал более 850 научных работ</strong> — включая два десятка монументальных монографий. Даже полностью ослепнув к 1771 году, он продолжал диктовать новые исследования. По объёму научного наследия с ним не сравнится ни один математик в истории.</p>
+
+        <p>Эйлер не просто решал отдельные задачи — он <em>систематизировал</em> математику. До него анализ, алгебра, геометрия и теория чисел существовали разрозненно. Эйлер первым связал их в единую систему, введя единый язык символов и нотаций. Именно он ввёл обозначения <strong>e</strong>, <strong>π</strong>, <strong>i</strong>, <strong>Σ</strong>, <strong>f(x)</strong> — те самые, которыми пользуется весь мир по сей день.</p>
+
+        <p>Он основал новые разделы математики: <em>вариационное исчисление</em>, <em>теорию графов</em>, <em>теорию комплексных функций</em>, <em>дифференциальную геометрию поверхностей</em>. По существу, математика преподаётся «по Эйлеру» — его подходы стали стандартом.</p>
+
+        <div class="callout-box" style="margin-top:2rem;">
+          «Читайте Эйлера, читайте Эйлера — он учитель нас всех.»
+          <br><span style="font-size:0.85rem; opacity:0.65; font-style:normal;">— Пьер-Симон Лаплас, математик</span>
+        </div>
+
+        <p>Его формула <strong>e<sup>iπ</sup> + 1 = 0</strong>, известная как «тождество Эйлера», регулярно называется математиками самой красивой формулой в истории — она соединяет пять фундаментальных констант в одном равенстве.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     ОТКРЫТИЯ — АККОРДЕОНЫ
+════════════════════════════════════════════════ -->
+<div class="discoveries-zone">
+  <div class="section-wide fade-in">
+    <div class="ornamental-rule"><span>Открытия</span></div>
+    <div class="chapter-label">Глава III</div>
+    <h2 class="text-center" style="margin-bottom:0.75rem;">Математические открытия<br>Леонарда Эйлера</h2>
+    <p class="text-center" style="max-width:620px; margin:0 auto; color:rgba(26,20,16,0.6); font-style:italic; font-size:1rem;">
+      Нажмите на раздел, чтобы раскрыть теоремы и открытия. Нажмите повторно — чтобы свернуть.
+    </p>
+
+    <div class="accordion-grid">
+
+      <!-- 1. ТЕОРИЯ ЧИСЕЛ -->
+      <div class="accordion" id="acc-1">
+        <div class="accordion-header" onclick="toggleAccordion('acc-1')">
+          <div class="accordion-title-wrap">
+            <div class="accordion-number">Раздел 01</div>
+            <div class="accordion-title">Теория чисел</div>
+            <div class="accordion-desc">Числа, делители, простота</div>
+          </div>
+          <div class="accordion-arrow">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M2 5l5 5 5-5"/>
+            </svg>
+          </div>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-inner">
+
+            <div class="theorem-card">
+              <span class="theorem-badge">Теорема</span>
+              <div class="theorem-name">Теорема Эйлера (обобщение малой теоремы Ферма)</div>
+              <div class="theorem-body">
+                Если целое число <em>a</em> и натуральное число <em>n</em> взаимно просты (не имеют общих делителей, кроме 1), то:
+                <div class="theorem-formula">a^φ(n) ≡ 1 (mod n)</div>
+                где <strong>φ(n)</strong> — функция Эйлера: количество натуральных чисел от 1 до n, взаимно простых с n.
+                <br><br>Например, при n = 10 и a = 3: φ(10) = 4, и 3⁴ = 81 ≡ 1 (mod 10). ✓
+                <br><em>Эта теорема лежит в основе алгоритма RSA — главной системы шифрования интернета.</em>
+              </div>
+            </div>
+
+            <div class="theorem-card">
+              <span class="theorem-badge">Функция</span>
+              <div class="theorem-name">Функция Эйлера φ(n)</div>
+              <div class="theorem-body">
+                φ(n) — количество натуральных чисел от 1 до n, взаимно простых с n. Если <em>p</em> — простое число, то φ(p) = p − 1. Например:
+                <div class="theorem-formula">φ(7) = 6, φ(12) = 4, φ(1) = 1</div>
+                Для произведения двух взаимно простых чисел: φ(mn) = φ(m) · φ(n).
+              </div>
+            </div>
+
+            <div class="theorem-card">
+              <span class="theorem-badge">Теорема</span>
+              <div class="theorem-name">О чётных совершенных числах</div>
+              <div class="theorem-body">
+                Совершенное число — то, которое равно сумме своих делителей (кроме себя). Например: 6 = 1+2+3. Эйлер доказал, что <strong>каждое чётное совершенное число</strong> имеет вид:
+                <div class="theorem-formula">2^(p−1) · (2^p − 1)</div>
+                где число (2<sup>p</sup> − 1) является простым (числом Мерсенна). Это исчерпывающая характеристика таких чисел.
+              </div>
+            </div>
+
+            <div class="theorem-card">
+              <span class="theorem-badge">Результат</span>
+              <div class="theorem-name">Разложение ζ(2) = π²/6</div>
+              <div class="theorem-body">
+                Эйлер решил «Базельскую задачу», которая оставалась открытой почти сто лет: найти сумму обратных квадратов натуральных чисел.
+                <div class="theorem-formula">1 + 1/4 + 1/9 + 1/16 + ... = π²/6</div>
+                Это открытие потрясло математиков — никто не ожидал, что число π появится в задаче, связанной с целыми числами.
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. КОМБИНАТОРИКА И ТЕОРИЯ ГРАФОВ -->
+      <div class="accordion" id="acc-2">
+        <div class="accordion-header" onclick="toggleAccordion('acc-2')">
+          <div class="accordion-title-wrap">
+            <div class="accordion-number">Раздел 02</div>
+            <div class="accordion-title">Комбинаторика<br>и теория графов</div>
+            <div class="accordion-desc">Маршруты, структуры, связи</div>
+          </div>
+          <div class="accordion-arrow">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M2 5l5 5 5-5"/>
+            </svg>
+          </div>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-inner">
+
+            <div class="theorem-card">
+              <span class="theorem-badge">Теорема</span>
+              <div class="theorem-name">Задача о Кёнигсбергских мостах (1736)</div>
+              <div class="theorem-body">
+                В Кёнигсберге через реку было переброшено 7 мостов. Жители задались вопросом: можно ли пройти по всем мостам ровно по одному разу? Эйлер доказал, что <strong>нет</strong>, и сформулировал общий критерий:
+                <div class="theorem-formula">Эйлеров путь существует ⟺ граф связный и имеет ровно 0 или 2 вершины нечётной степени</div>
+                Это положило начало теории графов — разделу, без которого невозможны современные навигаторы и социальные сети.
+              </div>
+            </div>
+
+            <div class="theorem-card">
+              <span class="theorem-badge">Теорема</span>
+              <div class="theorem-name">Теорема об эйлеровом цикле</div>
+              <div class="theorem-body">
+                Эйлеров цикл — маршрут, проходящий по каждому ребру графа ровно один раз и возвращающийся в начало. Теорема Эйлера:
+                <div class="theorem-formula">Эйлеров цикл существует ⟺ все вершины графа имеют чётную степень</div>
+                Степень вершины — это количество рёбер, выходящих из неё. Простая и элегантная характеристика.
+              </div>
+            </div>
+
+            <div class="theorem-card">
+              <span class="theorem-badge">Формула</span>
+              <div class="theorem-name">Число разбиений числа</div>
+              <div class="theorem-body">
+                Эйлер первым систематически исследовал число разбиений — способов представить натуральное число в виде суммы натуральных слагаемых. Например, число 4 можно разбить 5 способами: 4, 3+1, 2+2, 2+1+1, 1+1+1+1. Он доказал важное тождество:
+                <div class="theorem-formula">Разбиения на нечётные слагаемые = разбиения на различные слагаемые</div>
+                Это неочевидный и красивый факт, который Эйлер установил с помощью производящих функций — нового инструмента, им же и изобретённого.
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. ГЕОМЕТРИЯ -->
+      <div class="accordion" id="acc-3">
+        <div class="accordion-header" onclick="toggleAccordion('acc-3')">
+          <div class="accordion-title-wrap">
+            <div class="accordion-number">Раздел 03</div>
+            <div class="accordion-title">Геометрия</div>
+            <div class="accordion-desc">Многогранники, окружности, пространство</div>
+          </div>
+          <div class="accordion-arrow">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M2 5l5 5 5-5"/>
+            </svg>
+          </div>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-inner">
+
+            <div class="theorem-card">
+              <span class="theorem-badge">Теорема</span>
+              <div class="theorem-name">Формула Эйлера для многогранников</div>
+              <div class="theorem-body">
+                Для любого выпуклого многогранника (куб, тетраэдр, октаэдр и любой другой):
+                <div class="theorem-formula">V − E + F = 2</div>
+                где V — число вершин, E — число рёбер, F — число граней. Например, у куба: V=8, E=12, F=6, и 8−12+6 = 2. ✓
+                <br><br>Эта формула связала топологию с геометрией и стала одним из самых фундаментальных результатов математики.
+              </div>
+            </div>
+
+            <div class="theorem-card">
+              <span class="theorem-badge">Теорема</span>
+              <div class="theorem-name">Теорема Эйлера о прямой в треугольнике</div>
+              <div class="theorem-body">
+                В любом треугольнике три замечательные точки — <em>центр описанной окружности (O)</em>, <em>центроид (G, точка пересечения медиан)</em> и <em>ортоцентр (H)</em> — всегда лежат на одной прямой, называемой <strong>прямой Эйлера</strong>.
+                <div class="theorem-formula">O, G, H — коллинеарны, причём OG : GH = 1 : 2</div>
+                Это один из самых изящных фактов элементарной геометрии.
+              </div>
+            </div>
+
+            <div class="theorem-card">
+              <span class="theorem-badge">Формула</span>
+              <div class="theorem-name">Формула Эйлера для вписанной и описанной окружностей</div>
+              <div class="theorem-body">
+                Если R — радиус описанной окружности треугольника, r — радиус вписанной окружности, d — расстояние между их центрами, то:
+                <div class="theorem-formula">d² = R(R − 2r)</div>
+                Из этой формулы немедленно следует неравенство Эйлера: R ≥ 2r, то есть радиус описанной окружности не меньше двойного радиуса вписанной.
+              </div>
+            </div>
+
+            <div class="theorem-card">
+              <span class="theorem-badge">Следствие</span>
+              <div class="theorem-name">Правильные многогранники: ровно пять</div>
+              <div class="theorem-body">
+                Применяя свою формулу V − E + F = 2 и условие правильности (все грани одинаковые правильные многоугольники), Эйлер дал строгое доказательство: существует <strong>ровно пять правильных (платоновых) тел</strong>:
+                <div class="theorem-formula">тетраэдр · куб · октаэдр · додекаэдр · икосаэдр</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. АЛГЕБРА И АНАЛИЗ -->
+      <div class="accordion" id="acc-4">
+        <div class="accordion-header" onclick="toggleAccordion('acc-4')">
+          <div class="accordion-title-wrap">
+            <div class="accordion-number">Раздел 04</div>
+            <div class="accordion-title">Алгебра и анализ</div>
+            <div class="accordion-desc">Формулы, тождества, бесконечность</div>
+          </div>
+          <div class="accordion-arrow">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M2 5l5 5 5-5"/>
+            </svg>
+          </div>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-inner">
+
+            <div class="theorem-card">
+              <span class="theorem-badge">Формула</span>
+              <div class="theorem-name">Формула Эйлера для комплексных чисел</div>
+              <div class="theorem-body">
+                Одна из самых важных формул в математике — связь показательной функции с тригонометрией:
+                <div class="theorem-formula">e^(ix) = cos(x) + i · sin(x)</div>
+                При x = π получается <strong>тождество Эйлера</strong> — самая красивая формула математики:
+                <div class="theorem-formula">e^(iπ) + 1 = 0</div>
+                В одном равенстве пять фундаментальных констант: e, i, π, 1, 0.
+              </div>
+            </div>
+
+            <div class="theorem-card">
+              <span class="theorem-badge">Формула</span>
+              <div class="theorem-name">Формулы Эйлера для sin и cos</div>
+              <div class="theorem-body">
+                Из формулы e<sup>ix</sup> = cos x + i sin x немедленно вытекают выражения для тригонометрических функций через экспоненту:
+                <div class="theorem-formula">cos x = (e^(ix) + e^(−ix)) / 2</div>
+                <div class="theorem-formula">sin x = (e^(ix) − e^(−ix)) / (2i)</div>
+                Эти формулы соединяют вещественный и комплексный анализ.
+              </div>
+            </div>
+
+            <div class="theorem-card">
+              <span class="theorem-badge">Результат</span>
+              <div class="theorem-name">Произведение Эйлера и дзета-функция</div>
+              <div class="theorem-body">
+                Эйлер установил связь между суммой по натуральным числам и произведением по простым числам:
+                <div class="theorem-formula">Σ (1/nˢ) = Π 1/(1 − p^(−s))</div>
+                где сумма идёт по всем натуральным n, а произведение — по всем простым p. Это открытие дало толчок аналитической теории чисел и предвосхитило работу Римана.
+              </div>
+            </div>
+
+            <div class="theorem-card">
+              <span class="theorem-badge">Метод</span>
+              <div class="theorem-name">Нахождение суммы ряда через многочлены</div>
+              <div class="theorem-body">
+                Чтобы доказать, что 1 + 1/4 + 1/9 + ... = π²/6, Эйлер представил функцию sin(x)/x как бесконечное произведение, аналогично тому, как многочлен раскладывается по корням:
+                <div class="theorem-formula">sin(x)/x = (1 − x²/π²)(1 − x²/4π²)(1 − x²/9π²)···</div>
+                Сравнивая коэффициенты разложения, он получил искомую сумму. Метод гениально прост и поразителен.
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /accordion-grid -->
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     ЗАКЛЮЧЕНИЕ
+════════════════════════════════════════════════ -->
+<div class="conclusion-zone">
+  <div class="section fade-in">
+    <div class="ornamental-rule"><span>Заключение</span></div>
+    <div class="chapter-label">Глава IV</div>
+    <h2>Почему стоит учиться<br>на открытиях Эйлера</h2>
+
+    <p>Математика Эйлера — идеальный материал для тех, кто хочет не просто освоить формулы, но <em>понять математику изнутри</em>. Вот почему.</p>
+
+    <div class="conclusion-grid">
+      <div class="conclusion-card">
+        <span class="conclusion-card-icon">∞</span>
+        <h4>Охватывает все разделы</h4>
+        <p>Открытия Эйлера относятся к теории чисел, геометрии, алгебре, анализу и комбинаторике одновременно — изучая их, вы получаете панорамный взгляд на всю математику.</p>
+      </div>
+      <div class="conclusion-card">
+        <span class="conclusion-card-icon">✓</span>
+        <h4>Доступны старшекласснику</h4>
+        <p>Для понимания большинства теорем Эйлера достаточно хорошей школьной базы. Они требуют не сложных вычислений, а <em>математического мышления</em> — умения видеть закономерности.</p>
+      </div>
+      <div class="conclusion-card">
+        <span class="conclusion-card-icon">⬡</span>
+        <h4>Удивляют и вдохновляют</h4>
+        <p>Его результаты нередко шокируют: кто мог ожидать, что π появится в сумме обратных квадратов? Такое удивление — лучший мотиватор для дальнейшего изучения математики.</p>
+      </div>
+      <div class="conclusion-card">
+        <span class="conclusion-card-icon">→</span>
+        <h4>Выходят за рамки программы</h4>
+        <p>Теоремы Эйлера не входят в стандартный курс, но вырастают из него. Это открывает дверь в настоящую математику — не ту, что в учебнике, а ту, что делают учёные.</p>
+      </div>
+    </div>
+
+    <div class="big-quote">
+      Изучать математику через Эйлера — значит учиться у мастера, который умел видеть красоту там, где другие видели лишь числа и формулы.
+    </div>
+
+    <p>Его открытия показывают: чтобы дойти до глубоких результатов, нужно <strong>хорошо владеть школьными знаниями</strong> — простыми числами, делителями, тригонометрией, многоугольниками. Но применять их нужно <em>творчески</em>, с воображением, не боясь задавать вопросы. Именно это делал Эйлер.</p>
+
+    <p>Популяризация математики через личность Эйлера — это приглашение к разговору: о красоте абстрактного мышления, о пользе глубокого знания и о том, что наука — это не скучный свод правил, а живое, постоянно развивающееся приключение.</p>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════ -->
+<footer>
+  <p>Исследовательский проект · Популяризация математики · Леонард Эйлер (1707–1783)</p>
+  <p style="margin-top:0.5rem; opacity:0.5;">Источники: Wikipedia, RUWIKI, Карацуба А.А. «Эйлер и теория чисел», Britannica</p>
+</footer>
+
+
+<script>
+  /* ── accordion toggle ── */
+  function toggleAccordion(id) {
+    const el = document.getElementById(id);
+    const isOpen = el.classList.contains('open');
+
+    // close all
+    document.querySelectorAll('.accordion').forEach(a => a.classList.remove('open'));
+
+    // open clicked if it was closed
+    if (!isOpen) el.classList.add('open');
+  }
+
+  /* ── scroll fade-in ── */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
